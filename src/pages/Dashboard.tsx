@@ -4,7 +4,7 @@ import { useQuiz } from '../context/QuizContext';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
-    const { quizzes, fetchQuizzes, startLiveSession, deleteQuiz } = useQuiz();
+    const { quizzes, fetchQuizzes, startLiveSession, deleteQuiz, saveQuiz } = useQuiz();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
 
