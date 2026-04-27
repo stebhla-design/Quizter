@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, Timer, Loader2, User } from 'lucide-react';
 import { useQuiz } from '../context/QuizContext';
+import { WS_BASE } from '../config';
 
 const ParticipantView: React.FC = () => {
     const { sessionId } = useParams<{ sessionId: string }>();
@@ -33,7 +34,7 @@ const ParticipantView: React.FC = () => {
     useEffect(() => {
         if (!sessionId) return;
         
-        const wsUrl = `ws://localhost:8000/ws/${sessionId}`;
+        const wsUrl = `${WS_BASE}/ws/${sessionId}`;
         const ws = new WebSocket(wsUrl);
         
         ws.onmessage = (event) => {

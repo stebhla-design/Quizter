@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_BASE } from '../config';
 import { Mail, Lock, Rocket, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -16,7 +17,7 @@ const Auth: React.FC<{ mode: 'login' | 'signup' }> = ({ mode }) => {
         
         try {
             const endpoint = mode === 'login' ? '/auth/login' : '/auth/signup';
-            const response = await fetch(`http://localhost:8000${endpoint}`, {
+            const response = await fetch(`${API_BASE}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })

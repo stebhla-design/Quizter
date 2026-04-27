@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Users, Play, ChevronRight, BarChart2, Crown, Timer, Info, Trophy, Rocket, Loader2, Copy } from 'lucide-react';
 import { useQuiz } from '../context/QuizContext';
+import { API_BASE, WS_BASE } from '../config';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LiveHost: React.FC = () => {
@@ -25,7 +26,7 @@ const LiveHost: React.FC = () => {
         if (!sessionId) return;
         const fetchParticipants = async () => {
             try {
-                const res = await fetch(`http://localhost:8000/api/sessions/${sessionId}/participants`);
+                const res = await fetch(`${API_BASE}/api/sessions/${sessionId}/participants`);
                 const data = await res.json();
                 setParticipantCount(data.length);
                 setLeaderboard(data.map((p: any) => ({
@@ -45,7 +46,7 @@ const LiveHost: React.FC = () => {
 
     useEffect(() => {
         if (!sessionId) return;
-        const ws = new WebSocket(`ws://localhost:8000/ws/${sessionId}`);
+        const ws = new WebSocket(`${WS_BASE}/ws/${sessionId}`);
         
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);

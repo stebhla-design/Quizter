@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart2, Users, Target, Clock, ArrowLeft, Download, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../config';
 
 const Reports: React.FC = () => {
     const navigate = useNavigate();
@@ -10,7 +11,7 @@ const Reports: React.FC = () => {
     React.useEffect(() => {
         const fetchResults = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/results');
+                const response = await fetch(`${API_BASE}/api/results`);
                 if (response.ok) {
                     const data = await response.json();
                     setReports(data);

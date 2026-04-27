@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-const API_BASE = "http://localhost:8000";
+import { API_BASE, WS_BASE } from '../config';
 
 interface QuizContextType {
     quizzes: any[];
@@ -92,7 +91,7 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const connectWebSocket = (sessionId: string) => {
         if (socket) socket.close();
         
-        const wsUrl = `${API_BASE.replace('http', 'ws')}/ws/${sessionId}`;
+        const wsUrl = `${WS_BASE}/ws/${sessionId}`;
         console.log("Connecting to WebSocket:", wsUrl);
         const newSocket = new WebSocket(wsUrl);
 
