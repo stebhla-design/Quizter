@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Rocket, ChevronRight, Hash } from 'lucide-react';
+import { Hash, ChevronRight } from 'lucide-react';
+import Logo from '../components/Logo';
 
 const JoinSession: React.FC = () => {
     const [code, setCode] = useState('');
@@ -25,12 +26,11 @@ const JoinSession: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md text-center"
             >
-                <div className="flex items-center justify-center gap-3 text-2xl font-black tracking-tighter text-teal-400 mb-12">
-                    <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-600/20">
-                        <Rocket className="text-white w-6 h-6" />
-                    </div>
-                    QUIZTER
-                </div>
+                <Logo 
+                    className="flex items-center justify-center gap-3 mb-12" 
+                    iconClassName="w-10 h-10 text-teal-400 drop-shadow-md" 
+                    textClassName="text-2xl font-black tracking-tighter text-teal-400"
+                />
 
                 <h1 className="text-4xl font-black mb-4">Join a Quiz</h1>
                 <p className="text-slate-400 mb-12 font-medium">Enter the 6-digit code shown on the host's screen to participate.</p>

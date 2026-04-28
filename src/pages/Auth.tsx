@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_BASE } from '../config';
-import { Mail, Lock, Rocket, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
+import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
 
 const Auth: React.FC<{ mode: 'login' | 'signup' }> = ({ mode }) => {
@@ -61,9 +62,11 @@ const Auth: React.FC<{ mode: 'login' | 'signup' }> = ({ mode }) => {
             >
                 <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl p-10 md:p-12">
                     <div className="text-center mb-10">
-                        <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-600/20">
-                            <Rocket className="text-white w-8 h-8" />
-                        </div>
+                        <Logo 
+                            showText={false}
+                            className="flex justify-center mb-6"
+                            iconClassName="w-16 h-16 text-teal-600 dark:text-teal-400 drop-shadow-md" 
+                        />
                         <h1 className="text-3xl font-black tracking-tight mb-2">
                             {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                         </h1>

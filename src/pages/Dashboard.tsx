@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout, List, LayoutGrid, FileText, Settings, Plus, Play, Edit3, Trash2, Search, Lock } from 'lucide-react';
 import { useQuiz } from '../context/QuizContext';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 const Dashboard: React.FC = () => {
     const { quizzes, fetchQuizzes, startLiveSession, deleteQuiz, saveQuiz } = useQuiz();
@@ -50,7 +51,7 @@ const Dashboard: React.FC = () => {
         <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
             <aside className="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-8 flex flex-col">
-                <div className="text-2xl font-black text-teal-600 dark:text-teal-400 mb-12 tracking-tighter">QUIZTER</div>
+                <Logo className="flex items-center gap-2 mb-12" />
                 <nav className="flex-1 space-y-2">
                     <SidebarLink icon={<Layout className="w-5 h-5" />} label="Home" path="/dashboard" active />
                     <SidebarLink icon={<List className="w-5 h-5" />} label="My Quizzes" path="/dashboard" />

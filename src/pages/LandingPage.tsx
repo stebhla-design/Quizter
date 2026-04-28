@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, Trophy, BarChart, Rocket, ChevronRight } from 'lucide-react';
+import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
 
 const LandingPage: React.FC = () => {
@@ -9,11 +10,8 @@ const LandingPage: React.FC = () => {
             {/* Header */}
             <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <Link to="/" className="flex items-center gap-2 text-2xl font-black tracking-tighter text-teal-600 dark:text-teal-400">
-                        <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
-                            <Rocket className="text-white w-5 h-5" />
-                        </div>
-                        QUIZTER
+                    <Link to="/">
+                        <Logo />
                     </Link>
                     <div className="flex items-center gap-6">
                         <Link to="/dashboard" className="text-sm font-semibold hover:text-teal-600 transition-colors">Dashboard</Link>
