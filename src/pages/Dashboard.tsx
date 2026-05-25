@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, List, LayoutGrid, FileText, Settings, Plus, Play, Edit3, Trash2, Search, Lock } from 'lucide-react';
+import { Layout, List, LayoutGrid, FileText, Settings, Plus, Play, Edit3, Trash2, Search, Lock, Sparkles } from 'lucide-react';
 import { useQuiz } from '../context/QuizContext';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import AiGeneratorModal from '../components/AiGeneratorModal';
 
 const Dashboard: React.FC = () => {
     const { quizzes, fetchQuizzes, startLiveSession, deleteQuiz, saveQuiz } = useQuiz();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
     useEffect(() => {
         fetchQuizzes();
@@ -80,12 +82,20 @@ const Dashboard: React.FC = () => {
                         <h1 className="text-4xl font-black tracking-tight mb-2">Host Dashboard</h1>
                         <p className="text-slate-500 font-medium">Manage your quizzes and track live engagement.</p>
                     </div>
-                    <button 
-                        onClick={handleCreateQuiz}
-                        className="bg-teal-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
-                    >
-                        <Plus className="w-5 h-5" /> Create New Quiz
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => setIsAiModalOpen(true)}
+                            className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-teal-600/20"
+                        >
+                            <Sparkles className="w-5 h-5 fill-current" /> AI Quiz Generator
+                        </button>
+                        <button 
+                            onClick={handleCreateQuiz}
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all"
+                        >
+                            <Plus className="w-5 h-5" /> Create New
+                        </button>
+                    </div>
                 </header>
 
                 {/* Stats Grid */}
@@ -143,6 +153,15 @@ const Dashboard: React.FC = () => {
                     )}
                 </div>
             </main>
+
+            <AiGeneratorModal 
+                isOpen={isAiModalOpen}
+                onClose={() => setIsAiModalOpen(false)}
+                onSuccess={(newQuiz) => {
+                    fetchQuizzes();
+                    navigate(`/builder/${newQuiz.id}`);
+                }}
+            />
         </div>
     );
 };

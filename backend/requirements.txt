@@ -7,3 +7,9 @@ python-jose[cryptography]
 passlib[bcrypt]
 websockets
 python-socketio
+pypdf
+python-docx
+python-pptx
+beautifulsoup4
+requests
+google-generativeai

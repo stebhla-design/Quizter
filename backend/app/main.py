@@ -1,10 +1,11 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Form, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from .models import database as models
 from pydantic import BaseModel
 from typing import List, Optional
 import json
+from .utils import parsers, ai
 
 app = FastAPI(title="Quizter API")
 
@@ -93,6 +94,74 @@ def create_quiz(quiz: QuizBase, db: Session = Depends(get_db)):
     
     db.commit()
     return {"message": "Quiz saved"}
+
+@app.post("/api/quizzes/generate")
+async def generate_quiz(
+    file: Optional[UploadFile] = File(None),
+    url: Optional[str] = Form(None),
+    prompt: Optional[str] = Form(None),
+    num_questions: int = Form(5),
+    category: str = Form("General"),
+    db: Session = Depends(get_db)
+):
+    source_text = ""
+    
+    if file:
+        filename = file.filename.lower()
+        content = await file.read()
+        
+        if filename.endswith(".pdf"):
+            source_text = parsers.extract_text_from_pdf(content)
+        elif filename.endswith(".docx"):
+            source_text = parsers.extract_text_from_docx(content)
+        elif filename.endswith(".pptx"):
+            source_text = parsers.extract_text_from_pptx(content)
+        elif filename.endswith((".txt", ".csv")):
+            source_text = content.decode("utf-8", errors="ignore")
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format. Please upload PDF, Word, PowerPoint, or Text files.")
+            
+    elif url:
+        source_text = parsers.extract_text_from_url(url)
+        
+    elif prompt:
+        source_text = f"General knowledge quiz about: {prompt}"
+        
+    else:
+        raise HTTPException(status_code=400, detail="Please upload a document, paste a URL, or enter a text prompt.")
+        
+    if not source_text or len(source_text.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Could not extract sufficient text content to generate a quiz. Please check your document or link.")
+        
+    custom_prompt = prompt if (file or url) else ""
+    generated = ai.generate_quiz_from_text(source_text, num_questions=num_questions, custom_prompt=custom_prompt)
+    
+    if not generated:
+        raise HTTPException(status_code=500, detail="Failed to generate quiz using AI. Please verify your GEMINI_API_KEY environment variable is set and correct.")
+        
+    import random
+    import string
+    
+    quiz_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    
+    quiz_data = {
+        "id": quiz_id,
+        "title": generated.get("title", "AI Generated Quiz"),
+        "category": category if category != "General" else generated.get("category", "General"),
+        "questions": generated.get("questions", [])
+    }
+    
+    db_quiz = models.Quiz(
+        id=quiz_id,
+        title=quiz_data["title"],
+        category=quiz_data["category"],
+        questions=quiz_data["questions"]
+    )
+    db.add(db_quiz)
+    db.commit()
+    
+    return quiz_data
+
 
 @app.delete("/api/quizzes/{quiz_id}")
 def delete_quiz(quiz_id: str, db: Session = Depends(get_db)):
