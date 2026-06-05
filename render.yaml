@@ -9,6 +9,28 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      # --- Email (password reset) ---
+      # Secrets: set their values in the Render dashboard (sync: false).
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USE_TLS
+        value: "true"
+      - key: SMTP_USE_SSL
+        value: "false"
+      # Frontend URL used to build the reset link in the email.
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: quizter-frontend
+          envVarKey: RENDER_EXTERNAL_URL
 
   - type: web
     name: quizter-frontend
