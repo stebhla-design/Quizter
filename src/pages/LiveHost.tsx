@@ -1,9 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Users, Play, ChevronRight, BarChart2, Crown, Timer, Info, Trophy, Rocket, Loader2, Copy } from 'lucide-react';
 import { useQuiz } from '../context/QuizContext';
 import { API_BASE, WS_BASE } from '../config';
 import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
+
+// Fire two angled bursts from the bottom corners — a classic "party popper" effect.
+const firePartyPoppers = () => {
+    const colors = ['#14b8a6', '#f59e0b', '#3b82f6', '#ffffff', '#ec4899'];
+    confetti({ particleCount: 120, angle: 60, spread: 70, origin: { x: 0, y: 1 }, colors });
+    confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1, y: 1 }, colors });
+    // A follow-up rain from the top for extra celebration.
+    setTimeout(() => {
+        confetti({ particleCount: 80, spread: 100, startVelocity: 45, origin: { x: 0.5, y: 0 }, colors });
+    }, 250);
+};
 
 const LiveHost: React.FC = () => {
     const { sessionId } = useParams<{ sessionId: string }>();
@@ -85,6 +97,16 @@ const LiveHost: React.FC = () => {
         if (b.totalCorrect !== a.totalCorrect) return b.totalCorrect - a.totalCorrect;
         return a.totalTime - b.totalTime;
     });
+
+    // Celebrate with party poppers when a winner emerges (the #1 ranked player has finished).
+    const winner = sortedLeaderboard[0]?.finished ? sortedLeaderboard[0].name : null;
+    const celebratedWinner = useRef<string | null>(null);
+    useEffect(() => {
+        if (status === 'active' && winner && celebratedWinner.current !== winner) {
+            celebratedWinner.current = winner;
+            firePartyPoppers();
+        }
+    }, [winner, status]);
 
     if (loading || !quiz) {
         return (
