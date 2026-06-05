@@ -9,22 +9,15 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      # --- Email (password reset) ---
-      # Secrets: set their values in the Render dashboard (sync: false).
-      - key: SMTP_HOST
+      # --- Email (password reset) via Resend HTTP API ---
+      # Uses HTTPS (port 443), so it works on Render's free plan (SMTP is blocked).
+      # Set the API key value in the Render dashboard (sync: false).
+      - key: RESEND_API_KEY
         sync: false
-      - key: SMTP_USER
+      # From address. Use "onboarding@resend.dev" for testing, or a verified
+      # domain sender like "Quizter <no-reply@yourdomain.com>" for production.
+      - key: EMAIL_FROM
         sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-      - key: SMTP_FROM
-        sync: false
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_USE_TLS
-        value: "true"
-      - key: SMTP_USE_SSL
-        value: "false"
       # Frontend URL used to build the reset link in the email.
       - key: FRONTEND_URL
         fromService:

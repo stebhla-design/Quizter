@@ -1,63 +1,59 @@
 import os
-import smtplib
-import ssl
-from email.message import EmailMessage
+import requests
+
+RESEND_API_URL = "https://api.resend.com/emails"
+
+# Resend's shared test sender. Works without owning/verifying a domain, but it
+# can ONLY deliver to the email address of the Resend account owner. For real
+# delivery to any recipient, verify a domain in Resend and set EMAIL_FROM.
+DEFAULT_FROM = "Quizter <onboarding@resend.dev>"
 
 
 class EmailNotConfigured(Exception):
-    """Raised when SMTP settings are missing so the caller can fall back."""
-
-
-def _is_truthy(value: str | None) -> bool:
-    return str(value).strip().lower() in ("1", "true", "yes", "on")
+    """Raised when the email provider is not configured so the caller can fall back."""
 
 
 def is_email_configured() -> bool:
-    return bool(os.getenv("SMTP_HOST") and os.getenv("SMTP_FROM"))
+    return bool(os.getenv("RESEND_API_KEY"))
 
 
 def send_email(to_address: str, subject: str, body_text: str, body_html: str | None = None) -> None:
-    """Send an email via a generic SMTP server configured through env vars.
+    """Send an email via the Resend HTTP API.
 
-    Required env vars: SMTP_HOST, SMTP_FROM.
-    Optional: SMTP_PORT (default 587), SMTP_USER, SMTP_PASSWORD,
-    SMTP_USE_TLS (default "true" -> STARTTLS), SMTP_USE_SSL (default "false").
+    Required env var: RESEND_API_KEY.
+    Optional: EMAIL_FROM (defaults to Resend's onboarding test sender).
+
+    Uses HTTPS (port 443), so it works on hosts that block outbound SMTP
+    (e.g. Render's free plan).
     """
-    host = os.getenv("SMTP_HOST")
-    sender = os.getenv("SMTP_FROM")
-    if not host or not sender:
-        raise EmailNotConfigured("SMTP_HOST and SMTP_FROM must be set to send email")
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        raise EmailNotConfigured("RESEND_API_KEY must be set to send email")
 
-    port = int(os.getenv("SMTP_PORT", "587"))
-    user = os.getenv("SMTP_USER")
-    password = os.getenv("SMTP_PASSWORD")
-    use_ssl = _is_truthy(os.getenv("SMTP_USE_SSL", "false"))
-    # STARTTLS by default unless an implicit-SSL connection is requested.
-    use_tls = _is_truthy(os.getenv("SMTP_USE_TLS", "true")) and not use_ssl
+    sender = os.getenv("EMAIL_FROM", DEFAULT_FROM)
 
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = sender
-    msg["To"] = to_address
-    msg.set_content(body_text)
+    payload = {
+        "from": sender,
+        "to": [to_address],
+        "subject": subject,
+        "text": body_text,
+    }
     if body_html:
-        msg.add_alternative(body_html, subtype="html")
+        payload["html"] = body_html
 
-    context = ssl.create_default_context()
-    if use_ssl:
-        with smtplib.SMTP_SSL(host, port, context=context) as server:
-            if user and password:
-                server.login(user, password)
-            server.send_message(msg)
-    else:
-        with smtplib.SMTP(host, port) as server:
-            server.ehlo()
-            if use_tls:
-                server.starttls(context=context)
-                server.ehlo()
-            if user and password:
-                server.login(user, password)
-            server.send_message(msg)
+    resp = requests.post(
+        RESEND_API_URL,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=15,
+    )
+
+    if resp.status_code >= 400:
+        # Surface the provider's error message to aid debugging.
+        raise RuntimeError(f"Resend API error {resp.status_code}: {resp.text}")
 
 
 def send_password_reset_email(to_address: str, reset_link: str) -> None:
