@@ -199,6 +199,33 @@ const LiveHost: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Keep the join QR + link visible so latecomers can still join mid-quiz */}
+                            <div className="bg-white/5 border border-white/10 rounded-[2rem] p-5 mb-8 flex flex-col sm:flex-row items-center gap-5">
+                                <div className="w-24 h-24 bg-white p-2 rounded-2xl shrink-0 shadow-lg">
+                                    <img
+                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/join/${sessionId}`)}`}
+                                        alt="Scan to join"
+                                        className="w-full h-full"
+                                    />
+                                </div>
+                                <div className="flex-1 min-w-0 text-center sm:text-left">
+                                    <p className="text-xs font-black uppercase tracking-widest text-teal-400 mb-1">Still open — join anytime</p>
+                                    <p className="text-slate-400 font-bold text-sm mb-2">Scan the code or use code <span className="text-white font-black">{sessionId}</span></p>
+                                    <div className="bg-black/40 px-3 py-2 rounded-xl border border-white/5 font-mono text-teal-400 text-xs break-all">
+                                        {window.location.origin}/join/{sessionId}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`${window.location.origin}/join/${sessionId}`);
+                                        alert("Invite link copied!");
+                                    }}
+                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-5 py-3 rounded-xl font-bold transition-all shrink-0"
+                                >
+                                    <Copy className="w-4 h-4" /> Copy Link
+                                </button>
+                            </div>
+
                             <div className="space-y-3">
                                 {sortedLeaderboard.length === 0 ? (
                                     <div className="text-center py-20 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
