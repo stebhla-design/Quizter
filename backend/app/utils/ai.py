@@ -1,7 +1,28 @@
 import os
 import json
+import random
 from typing import Optional, Dict, Tuple
 import google.generativeai as genai
+
+
+def _shuffle_options(question: Dict) -> None:
+    """Shuffle a question's options in place and remap correctAnswers indices.
+
+    LLMs tend to place the correct answer in a fixed slot (e.g. always option C).
+    Shuffling here guarantees the correct answer lands in a random position while
+    keeping correctAnswers pointing at the right option(s).
+    """
+    options = question.get("options")
+    if not isinstance(options, list) or len(options) < 2:
+        return
+
+    correct = set(question.get("correctAnswers", []))
+    # Pair each option with whether it is a correct answer, then shuffle the pairs.
+    paired = [(opt, idx in correct) for idx, opt in enumerate(options)]
+    random.shuffle(paired)
+
+    question["options"] = [opt for opt, _ in paired]
+    question["correctAnswers"] = [i for i, (_, is_correct) in enumerate(paired) if is_correct]
 
 def generate_quiz_from_text(text: str, num_questions: int = 5, custom_prompt: str = "") -> Tuple[Optional[Dict], Optional[str]]:
     """
@@ -79,7 +100,10 @@ def generate_quiz_from_text(text: str, num_questions: int = 5, custom_prompt: st
                 q["points"] = 1000
             else:
                 q["points"] = int(q["points"])
-                
+
+            # Randomize answer positions so the correct option isn't always in the same slot.
+            _shuffle_options(q)
+
         result["questions"] = questions
         return result, None
     except Exception as e:
