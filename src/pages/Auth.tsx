@@ -106,7 +106,7 @@ const Auth: React.FC<{ mode: 'login' | 'signup' }> = ({ mode }) => {
                     {isForgotPassword && isResetSent ? (
                         <div className="space-y-6">
                             <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl text-sm font-bold border border-emerald-100 dark:border-emerald-900/40 text-center leading-relaxed">
-                                A temporary password reset link has been printed in your backend server logs. Click on it to change your password!
+                                A password reset link has been sent to your email. Please check your inbox and follow the instructions to reset your password.
                             </div>
                             <button 
                                 onClick={() => {

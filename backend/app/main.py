@@ -8,7 +8,9 @@ from .models import database as models
 from pydantic import BaseModel
 from typing import List, Optional
 import json
+import os
 from .utils import parsers, ai
+from .utils.email import send_password_reset_email, is_email_configured, EmailNotConfigured
 
 app = FastAPI(title="Quizter API")
 
@@ -86,15 +88,36 @@ def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
     
     # Generate a mock token
     token = f"reset-{db_user.email}"
-    
-    # Print the clickable reset link to the console for testing
+
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+    reset_link = f"{frontend_url}/reset-password?token={token}"
+
+    if is_email_configured():
+        try:
+            send_password_reset_email(db_user.email, reset_link)
+        except EmailNotConfigured:
+            _print_reset_link(req.email, reset_link)
+        except Exception as e:
+            # Don't leak whether the address exists; surface a generic mail error.
+            print(f"❌ Failed to send password reset email: {e}")
+            raise HTTPException(
+                status_code=502,
+                detail="Could not send the reset email. Please try again later.",
+            )
+    else:
+        # No SMTP configured (e.g. local dev) — fall back to printing the link.
+        _print_reset_link(req.email, reset_link)
+
+    return {"message": "Reset link sent successfully"}
+
+
+def _print_reset_link(email: str, reset_link: str):
+    """Fallback used in development when SMTP is not configured."""
     print(f"\n==========================================")
     print(f"🔑 RESET PASSWORD LINK GENERATED:")
-    print(f"For: {req.email}")
-    print(f"Link: http://localhost:5173/reset-password?token={token}")
+    print(f"For: {email}")
+    print(f"Link: {reset_link}")
     print(f"==========================================\n")
-    
-    return {"message": "Reset link generated successfully"}
 
 @app.post("/auth/reset-password")
 def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
