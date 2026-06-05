@@ -9,6 +9,7 @@ import ParticipantView from './pages/ParticipantView';
 import Reports from './pages/Reports';
 import Auth from './pages/Auth';
 import JoinSession from './pages/JoinSession';
+import ResetPassword from './pages/ResetPassword';
 import { Navigate } from 'react-router-dom';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -31,6 +32,7 @@ const App: React.FC = () => {
                         <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
                         <Route path="/login" element={<Auth mode="login" />} />
                         <Route path="/signup" element={<Auth mode="signup" />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                     </Routes>
                 </div>
             </Router>

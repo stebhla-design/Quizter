@@ -70,6 +70,47 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
     token = f"mock-token-{db_user.id}-{db_user.email}"
     return {"token": token, "email": db_user.email}
 
+# --- FORGOT & RESET PASSWORD ROUTES ---
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+@app.post("/auth/forgot-password")
+def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == req.email).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Email address not found")
+    
+    # Generate a mock token
+    token = f"reset-{db_user.email}"
+    
+    # Print the clickable reset link to the console for testing
+    print(f"\n==========================================")
+    print(f"🔑 RESET PASSWORD LINK GENERATED:")
+    print(f"For: {req.email}")
+    print(f"Link: http://localhost:5173/reset-password?token={token}")
+    print(f"==========================================\n")
+    
+    return {"message": "Reset link generated successfully"}
+
+@app.post("/auth/reset-password")
+def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+    if not req.token.startswith("reset-"):
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+        
+    email = req.token.replace("reset-", "")
+    db_user = db.query(models.User).filter(models.User.email == email).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    db_user.hashed_password = req.new_password
+    db.commit()
+    
+    return {"message": "Password reset successful"}
+
 class SessionCreate(BaseModel):
     quiz_id: str
 
