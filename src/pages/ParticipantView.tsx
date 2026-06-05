@@ -1,9 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, Timer, Loader2, User } from 'lucide-react';
 import { useQuiz } from '../context/QuizContext';
 import { WS_BASE } from '../config';
+import confetti from 'canvas-confetti';
+
+// Fire two angled bursts from the bottom corners — a classic "party popper" effect.
+const firePartyPoppers = () => {
+    const colors = ['#14b8a6', '#f59e0b', '#3b82f6', '#ffffff', '#ec4899'];
+    confetti({ particleCount: 120, angle: 60, spread: 70, origin: { x: 0, y: 1 }, colors });
+    confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1, y: 1 }, colors });
+    setTimeout(() => {
+        confetti({ particleCount: 80, spread: 100, startVelocity: 45, origin: { x: 0.5, y: 0 }, colors });
+    }, 250);
+};
 
 const ParticipantView: React.FC = () => {
     const { sessionId } = useParams<{ sessionId: string }>();
@@ -101,6 +112,15 @@ const ParticipantView: React.FC = () => {
         if (isMatch) setTotalCorrect(prev => prev + 1);
         setStatus('result');
     };
+
+    // Celebrate with party poppers when the participant reaches the completion screen.
+    const celebrated = useRef(false);
+    useEffect(() => {
+        if (status === 'finished' && !celebrated.current) {
+            celebrated.current = true;
+            firePartyPoppers();
+        }
+    }, [status]);
 
     const handleNext = () => {
         if (questionIndex < (quiz?.questions?.length || 0) - 1) {
