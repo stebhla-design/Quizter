@@ -1,9 +1,9 @@
 import os
 import json
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 import google.generativeai as genai
 
-def generate_quiz_from_text(text: str, num_questions: int = 5, custom_prompt: str = "") -> Optional[Dict]:
+def generate_quiz_from_text(text: str, num_questions: int = 5, custom_prompt: str = "") -> Tuple[Optional[Dict], Optional[str]]:
     """
     Calls the Gemini API (using gemini-2.5-flash) to generate a structured multiple-choice quiz
     from the provided text.
@@ -11,7 +11,7 @@ def generate_quiz_from_text(text: str, num_questions: int = 5, custom_prompt: st
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("Error: GEMINI_API_KEY environment variable is not set.")
-        return None
+        return None, "GEMINI_API_KEY environment variable is not set."
         
     genai.configure(api_key=api_key)
     
@@ -81,7 +81,7 @@ def generate_quiz_from_text(text: str, num_questions: int = 5, custom_prompt: st
                 q["points"] = int(q["points"])
                 
         result["questions"] = questions
-        return result
+        return result, None
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
-        return None
+        return None, str(e)

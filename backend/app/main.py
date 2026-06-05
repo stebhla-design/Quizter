@@ -137,10 +137,13 @@ async def generate_quiz(
         raise HTTPException(status_code=400, detail="Could not extract sufficient text content to generate a quiz. Please check your document or link.")
         
     custom_prompt = prompt if (file or url) else ""
-    generated = ai.generate_quiz_from_text(source_text, num_questions=num_questions, custom_prompt=custom_prompt)
+    generated, err_msg = ai.generate_quiz_from_text(source_text, num_questions=num_questions, custom_prompt=custom_prompt)
     
     if not generated:
-        raise HTTPException(status_code=500, detail="Failed to generate quiz using AI. Please verify your GEMINI_API_KEY environment variable is set and correct.")
+        detail = "Failed to generate quiz using AI. Please verify your GEMINI_API_KEY environment variable is set and correct."
+        if err_msg:
+            detail += f" Details: {err_msg}"
+        raise HTTPException(status_code=500, detail=detail)
         
     import random
     import string
