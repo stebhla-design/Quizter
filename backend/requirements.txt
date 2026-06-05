@@ -13,3 +13,4 @@ python-pptx
 beautifulsoup4
 requests
 google-generativeai
+python-dotenv
